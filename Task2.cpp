@@ -44,8 +44,6 @@ void map2( std::vector<std::string> &strSet, char *argv[ ] ){
         exit( 1 );
     }
 
-    for( auto i : sz3 )
-        std::cout << i << std::endl;
     std::ofstream file3;
     file3.open( argv[ 1 ],  std::ios_base::out );
     if( !file3 ){
