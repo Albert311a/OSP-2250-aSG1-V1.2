@@ -12,13 +12,6 @@
 #include <random>
 #include <vector>
 #include <chrono>
-#include <string.h>
-
-int cmpstr( const void *a, const void *b ){
-    const char *aa = *( const char ** ) a;
-    const char *bb = *( const char ** ) b;
-    return strcmp( aa, bb );
-}
 
 bool letter3( const std::string &s1, const std::string &s2 ){
     std::string k1 = s1.substr( 2 );
