@@ -1,183 +1,133 @@
-//#include <ios>
 #include <iostream>
-#include <fstream>
-//#include <iterator>
-#include <string>
-//#include <set>
-//#include <sys/types.h>
-//#include <type_traits>
-#include <unistd.h> // fork
 #include <thread>
-#include <algorithm>
-#include <random>
+#include <string>
 #include <vector>
-#include <chrono>
+#include <algorithm>
+#include <fstream>
 
-bool letter3( const std::string &s1, const std::string &s2 ){
-    std::string k1 = s1.substr( 2 );
-    std::string k2 = s2.substr( 2 );
-    if( k1 > k2 )
-        return true;
-    return false;
-}
 
-void map2( std::vector<std::string> &strSet, char *argv[ ] ){
-    std::vector<std::string>::iterator it = strSet.begin( );
-    std::vector<std::string> sz3;
-    std::vector<std::string> sz15;
-
-    while( it != strSet.end( ) ){
-        if( it->length( ) >= 4 && it->length( ) <= 15 ){
-            sz15.push_back( *it );
-        } else if( it->length( ) == 3 ){
-            sz3.push_back( *it );
+class Dat{
+        std::vector<std::string> st;
+        std::string name;
+        std::vector<unsigned> k;
+    public:
+        Dat(  std::vector<std::string> &vs, const std::string &s ) : st( std::move( vs ) ), name( s ) {
+            k.resize( st.size( ) );
+            for( size_t i = 0; i < st.size( ); i++ ){
+                k[ i ] = i;
+            }
         }
-        it++;
-    }
 
-    pid_t pid = fork( );
-    if( pid == 0 ){
-        sort( sz15.begin( ), sz15.end( ), letter3 );
-    } else if( pid > 0 ){
-        sort( sz3.begin( ), sz3.end( ), letter3 );
-    } else {
-        std::cerr << "unable to open fork" << std::endl;
-        exit( 1 );
-    }
-
-    std::ofstream file3;
-    file3.open( argv[ 1 ],  std::ios_base::out );
-    if( !file3 ){
-        std::cerr << "Error: " << argv[ 1 ] << " file could not be opened" << std::endl;
-        exit( 1 );
-    }
-
-    file3.close( );
-
-    std::ofstream file15;
-    file15.open( argv[ 2 ] );
-    if( !file15 ){
-        std::cerr << "Error: file " << argv[ 2 ] << " could not be opened" << std::endl;
-        exit( 1 );
-    }
-    for( auto i : sz15 ){
-        file15 << i << std::endl;
-    }
-    file15.close( );
-}
-
-void Task1filter( std::vector<std::string> &vstr, const int &i, char *argv[ ] ){
-    std::fstream file;
-    std::string line;
-    file.open( argv[ i ] );
-    if( !file ){
-        std::cerr << "File " << argv[ i ] << " not found" << std::endl;
-        exit( 1 );
-    }
-    while( getline( file, line ) ){
-        vstr.push_back( line );
-    }
-    std::vector<std::string>::iterator it;
-    it = unique( vstr.begin( ), vstr.end( ) );
-    unsigned seed = std::chrono::system_clock::now( ).time_since_epoch( ).count( );
-    shuffle( vstr.begin( ), vstr.end( ), std::default_random_engine( seed ) );
-
-}
-void reduce( int argc, char *argv[ ] ){
-    int i = 3;
-    std::fstream file;
-    std::string line = "";
-    std::vector<std::string> data;
-
-    while( i < argc ){
-        std::vector<std::string> vstr;
-        Task1filter( vstr, i , argv );
-        data.insert( data.end( ), vstr.begin( ), vstr.end( ) );
-        i++;
-    }
-    std::vector<std::string>::iterator it;
-    it = unique( data.begin( ), data.end( ) );
-    map2( data, argv );
-}
-
-void map3( std::vector<std::string> &st, std::vector<std::vector<int>> &v, std::vector<std::thread> &thr ){
-    for( int i = 0; i < thr.size( ); i++ ){
-        switch( st[ i ].size( ) ){
-            case 3:
-                v[ 0 ].push_back( i );
-                break;
-            case 4:
-                v[ 1 ].push_back( i );
-                break;
-            case 5:
-                v[ 2 ].push_back( i );
-                break;
-            case 6:
-                v[ 3 ].push_back( i );
-                break;
-            case 7:
-                v[ 4 ].push_back( i );
-                break;
-            case 8:
-                v[ 5 ].push_back( i );
-                break;
-            case 9:
-                v[ 6 ].push_back( i );
-                break;
-            case 10:
-                v[ 7 ].push_back( i );
-                break;
-            case 11:
-                v[ 8 ].push_back( i );
-                break;
-            case 12:
-                v[ 9 ].push_back( i );
-                break;
-            case 13:
-                v[ 10 ].push_back( i );
-                break;
-            case 14:
-                v[ 11 ].push_back( i );
-                break;
-            case 15:
-                v[ 12 ].push_back( i );
-                break;
+        void partition( std::vector<unsigned> &m, int start, int high ){
+            int i = start, j = high;
+            std::string mid = st[ m[ ( i + j ) / 2 ] ].substr( 2 );
+            while( i <= j ){
+                while( st[ m[ i ] ].substr( 2 ) < mid ) i++;
+                while( st[ m[ j ] ].substr( 2 ) > mid ) j--;
+                if( i <= j ){
+                    std::swap( m[ i ], m[ j ] );
+                    i++; j--;
+                }
+            }
+            if( start <  j ) partition( m, start, j );
+            if( i < high ) partition( m, i, high );
         }
-    }
-    for( int i = 0; i < 13; i++ ){
-        std::thread tr;
-        thr.push_back( move( tr ) );
-    }
-    for( int i = 0; i < v.size( ); i++ ){
-        std::ofstream file;
-        std::string k = "f" + std::to_string( i );
-        file.open( k );
-        for( int z = 0; z < v[ i ].size( ); i++ ){
-            file << v[ i ][ z ] << std::endl;
+
+        void sort(  ){
+            partition( k, 0, k.size( ) - 1 );
         }
-        file.close( );
-    }
+
+        void save( ){
+            std::ofstream ofile;
+            ofile.open( name );
+            for( size_t i = 0; i < st.size( ); i++ ){
+                ofile << st[ k[ i ] ] << std::endl;
+            }
+            ofile.close( );
+        }
+};
+
+
+void  task(  std::vector<std::string> &d, const std::string &s ){
+    Dat k( d, s );
+    k.sort( );
+    k.save( );
 }
+
 
 int main( int argc, char *argv[ ] ){
 
-    int i = 3;
-    std::vector<std::string> globeStr;
-    std::vector<std::thread> thr;
-    std::vector<std::vector<int>> vmatrix;
-    if( argc > 3  ){
-        std::vector<std::string> st;
-        while( i < argc ){
-            Task1filter( st, i, argv );
-            globeStr.insert( globeStr.end( ), st.begin( ), st.end( ) );
-            i++;
+    std::vector<std::vector<std::string>> s1( 13 );
+
+    for( int i = 1; i < argc; i++){
+        std::ifstream ifile;
+        std::string line;
+        std::string fname = argv[ i ];
+        ifile.open( fname );
+        while( getline( ifile, line ) ){
+            int l = line.size( );
+            switch( l ){
+                case 3:
+                    s1[ 0 ].push_back( line );
+                    break;
+                case 4:
+                    s1[ 1 ].push_back( line );
+                    break;
+                case 5:
+                    s1[ 2 ].push_back( line );
+                    break;
+                case 6:
+                    s1[ 3 ].push_back( line );
+                    break;
+                case 7:
+                    s1[ 4 ].push_back( line );
+                    break;
+                case 8:
+                    s1[ 5].push_back( line );
+                    break;
+                case 9:
+                    s1[ 6 ].push_back( line );
+                    break;
+                case 10:
+                    s1[ 7 ].push_back( line );
+                    break;
+                case 11:
+                    s1[ 8 ].push_back( line );
+                    break;
+                case 12:
+                    s1[ 9 ].push_back( line );
+                    break;
+                case 13:
+                    s1[ 10 ].push_back( line );
+                    break;
+                case 14:
+                    s1[ 11 ].push_back( line );
+                    break;
+                case 15:
+                    s1[ 12 ].push_back( line );
+                    break;
+            }
         }
-        reduce( argc, argv );
-    } else{
-        std::cerr << "failed to provide proper arguments\n";
-        exit( 1 );
+        std::cout << argv[ i ] << std::endl;
     }
 
+    std::vector<std::thread> dv;
+    int n = 3, bf = 2;
+    for( auto &vec : s1){
+
+        std::string st = "text";
+        std::string n2 = std::to_string( n );
+        int sz = bf - n2.size( );
+        std::string fs = st.append( sz, '0' ).append( n2 );
+
+        std::thread th( task, std::ref( vec ), ( fs ) );
+        dv.emplace_back( std::move( th ) );
+        n++;
+    }
+
+    for( auto &t : dv ){
+        t.join( );
+    }
 	return 0;
 }
 
