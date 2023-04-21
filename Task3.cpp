@@ -65,48 +65,8 @@ int main( int argc, char *argv[ ] ){
         std::string fname = argv[ i ];
         ifile.open( fname );
         while( getline( ifile, line ) ){
-            int l = line.size( );
-            switch( l ){
-                case 3:
-                    s1[ 0 ].push_back( line );
-                    break;
-                case 4:
-                    s1[ 1 ].push_back( line );
-                    break;
-                case 5:
-                    s1[ 2 ].push_back( line );
-                    break;
-                case 6:
-                    s1[ 3 ].push_back( line );
-                    break;
-                case 7:
-                    s1[ 4 ].push_back( line );
-                    break;
-                case 8:
-                    s1[ 5].push_back( line );
-                    break;
-                case 9:
-                    s1[ 6 ].push_back( line );
-                    break;
-                case 10:
-                    s1[ 7 ].push_back( line );
-                    break;
-                case 11:
-                    s1[ 8 ].push_back( line );
-                    break;
-                case 12:
-                    s1[ 9 ].push_back( line );
-                    break;
-                case 13:
-                    s1[ 10 ].push_back( line );
-                    break;
-                case 14:
-                    s1[ 11 ].push_back( line );
-                    break;
-                case 15:
-                    s1[ 12 ].push_back( line );
-                    break;
-            }
+            if( line.size( ) > 2 && line.size( ) < 16 )
+                s1[ line.size( ) - 3  ].push_back( line  );
         }
         std::cout << argv[ i ] << std::endl;
     }
